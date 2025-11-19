@@ -1,0 +1,30 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "description": "Notification Service - WebSocket & Email notifications",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node test.js"
+  },
+  "keywords": ["notifications", "websocket", "microservice"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "pg": "^8.11.3",
+    "redis": "^4.6.7",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "compression": "^1.7.4",
+    "winston": "^3.10.0",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.0",
+    "nodemailer": "^6.9.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

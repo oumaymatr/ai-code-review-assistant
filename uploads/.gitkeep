@@ -1,0 +1,14 @@
+# Dossier uploads partagé
+
+Ce dossier est partagé entre les services Docker pour stocker les fichiers uploadés.
+
+Structure:
+
+```
+uploads/
+├── temp/           # Fichiers temporaires
+├── reviews/        # Fichiers de code analysés
+└── results/        # Résultats d'analyse exportés
+```
+
+Les fichiers sont automatiquement nettoyés après 7 jours.

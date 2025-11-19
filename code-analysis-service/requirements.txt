@@ -1,0 +1,69 @@
+# ✅ Dépendances Code Analysis Service
+
+# FastAPI et serveur ASGI
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+python-multipart==0.0.6
+
+# Clients HTTP et API
+httpx>=0.25.2
+aiohttp==3.9.1
+requests==2.31.0
+
+# OpenAI API
+openai==1.7.2
+
+# Ollama Python client
+ollama==0.1.6
+
+# Analyse de code
+pylint==3.0.3
+black==23.12.1
+isort==5.13.2
+mypy==1.8.0
+radon==6.0.1
+bandit==1.7.6
+
+# Parsing et AST
+astroid==3.0.2
+autopep8==2.0.4
+
+# Traitement de texte et parsing
+markdown==3.5.1
+pygments==2.17.2
+
+# Base de données
+redis==5.0.1
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+
+# Security et Auth
+PyJWT==2.8.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Logging et monitoring
+python-json-logger==2.0.7
+prometheus-client==0.19.0
+
+# Testing
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+
+# Utilitaires
+python-dotenv==1.0.0
+pyyaml==6.0.1
+orjson==3.9.12
+python-multipart==0.0.6
+jinja2==3.1.3
+
+# Sécurité
+cryptography==42.0.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Performance
+cachetools==5.3.2

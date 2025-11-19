@@ -1,0 +1,55 @@
+{
+  "name": "ai-code-review-user-service",
+  "version": "1.0.0",
+  "description": "User Service pour AI Code Review Assistant - Gestion des utilisateurs, authentification et profils",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "migrate": "node src/database/migrate.js",
+    "seed": "node src/database/seed.js"
+  },
+  "keywords": [
+    "user-service",
+    "authentication",
+    "jwt",
+    "postgres",
+    "microservice"
+  ],
+  "author": "AI Code Review Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.2.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.3",
+    "pg": "^8.16.3",
+    "pg-pool": "^3.6.1",
+    "redis": "^4.7.1",
+    "sharp": "^0.32.1",
+    "uuid": "^9.0.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.44.0",
+    "jest": "^29.6.1",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.0",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

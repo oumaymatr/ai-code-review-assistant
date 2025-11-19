@@ -1,0 +1,268 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai-review-postgres
+    environment:
+      POSTGRES_DB: ai_code_review_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - ai-review-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # Cache Redis (sessions + performance)
+  redis:
+    image: redis:7-alpine
+    container_name: ai-review-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ai-review-network
+    command: redis-server --appendonly yes
+
+  # API Gateway - Point d'entrée unique (Port 5000)
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile.dev
+    container_name: ai-review-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ai_code_review_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-123
+      # URLs des microservices
+      USER_SERVICE_URL: http://user-service:3002
+      REVIEW_SERVICE_URL: http://review-service:5002
+      CODE_ANALYSIS_SERVICE_URL: http://code-analysis-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:5004
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+
+  # User Service - Gestion utilisateurs (Port 3002)
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile.dev
+    container_name: ai-review-user-service
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ai_code_review_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-123
+    volumes:
+      - ./user-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+
+  # Review Service - Gestion reviews (Port 5002)  
+  review-service:
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile.dev
+    container_name: ai-review-review-service
+    ports:
+      - "5002:5002"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ai_code_review_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-123
+      CODE_ANALYSIS_SERVICE_URL: http://code-analysis-service:3003
+    volumes:
+      - ./review-service:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads  # Dossier partagé pour uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+
+  # Code Analysis Service - IA Python (Port 3003)
+  code-analysis-service:
+    build:
+      context: ./code-analysis-service
+      dockerfile: Dockerfile.dev
+    container_name: ai-review-code-analysis
+    ports:
+      - "3003:3003"
+    environment:
+      PYTHONPATH: /app
+      # Application
+      PORT: 3003
+      ENV: development
+      DEBUG: "True"
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ai_code_review_dev
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 1
+      # LLM Providers
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5-coder:0.5b
+      OLLAMA_TIMEOUT: "600"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: gpt-3.5-turbo
+      OPENAI_MAX_TOKENS: 2000
+      OPENAI_TEMPERATURE: 0.3
+      # Provider Configuration
+      LLM_PROVIDER: ollama
+      LLM_FALLBACK: openai
+      # CORS
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:5000,http://api-gateway:5000
+      # Security
+      JWT_SECRET: dev-jwt-secret-123
+      # Analysis Settings
+      MAX_CODE_LENGTH: 50000
+      SUPPORTED_LANGUAGES: python,javascript,typescript,java,go,rust,cpp,c
+      TESTS_COVERAGE_TARGET: 80
+      # Logging
+      LOG_LEVEL: INFO
+      LOG_FILE: logs/code-analysis.log
+    volumes:
+      - ./code-analysis-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      ollama:
+        condition: service_started
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+
+  # Notification Service - WebSocket + Email (Port 5004)
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile.dev
+    container_name: ai-review-notification-service
+    ports:
+      - "5004:5004"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ai_code_review_dev
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+
+  # Ollama - LLMs locaux (Port 11434)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai-review-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_dev_data:/root/.ollama
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=5m
+      - OLLAMA_HOST=0.0.0.0
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 6G
+
+  # Frontend React - Interface (Port 3000)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: ai-review-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+      REACT_APP_WS_URL: ws://localhost:5000/ws
+      CHOKIDAR_USEPOLLING: true  # Hot reload sur Windows
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api-gateway
+    networks:
+      - ai-review-network
+    stdin_open: true
+    tty: true
+
+  # PgAdmin - Interface DB (Port 5050)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ai-review-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@dev.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - ai-review-network
+    restart: unless-stopped
+
+# Volumes persistants
+volumes:
+  postgres_dev_data:
+  ollama_dev_data:
+
+# Réseau interne
+networks:
+  ai-review-network:
+    driver: bridge
+    name: ai-review-net

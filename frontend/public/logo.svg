@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Gradient background -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#bgGrad)"/>
+  
+  <!-- Code brackets with AI spark -->
+  <g transform="translate(100, 100)">
+    <!-- Left bracket -->
+    <path d="M -45 -40 L -60 -40 L -60 40 L -45 40" 
+          stroke="white" 
+          stroke-width="8" 
+          stroke-linecap="round"
+          fill="none"/>
+    
+    <!-- Right bracket -->
+    <path d="M 45 -40 L 60 -40 L 60 40 L 45 40" 
+          stroke="white" 
+          stroke-width="8" 
+          stroke-linecap="round"
+          fill="none"/>
+    
+    <!-- AI Spark/Star in center -->
+    <g transform="translate(0, 0)">
+      <!-- Central star representing AI -->
+      <path d="M 0 -25 L 5 -8 L 22 -8 L 8 2 L 13 19 L 0 8 L -13 19 L -8 2 L -22 -8 L -5 -8 Z"
+            fill="url(#sparkGrad)"
+            stroke="white"
+            stroke-width="2"/>
+      
+      <!-- Small sparkles -->
+      <circle cx="-35" cy="-15" r="3" fill="white" opacity="0.8"/>
+      <circle cx="35" cy="-15" r="3" fill="white" opacity="0.8"/>
+      <circle cx="-30" cy="20" r="2" fill="white" opacity="0.6"/>
+      <circle cx="32" cy="22" r="2" fill="white" opacity="0.6"/>
+    </g>
+    
+    <!-- Code lines inside brackets -->
+    <line x1="-35" y1="-20" x2="-15" y2="-20" stroke="white" stroke-width="3" opacity="0.7"/>
+    <line x1="-35" y1="-5" x2="-10" y2="-5" stroke="white" stroke-width="3" opacity="0.7"/>
+    <line x1="-35" y1="10" x2="-20" y2="10" stroke="white" stroke-width="3" opacity="0.7"/>
+    
+    <line x1="15" y1="-20" x2="35" y2="-20" stroke="white" stroke-width="3" opacity="0.7"/>
+    <line x1="10" y1="-5" x2="35" y2="-5" stroke="white" stroke-width="3" opacity="0.7"/>
+    <line x1="20" y1="10" x2="35" y2="10" stroke="white" stroke-width="3" opacity="0.7"/>
+  </g>
+</svg>
