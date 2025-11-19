@@ -78,35 +78,41 @@ app.use((error, req, res, next) => {
 });
 
 const PORT = config.port;
-const server = app.listen(PORT, () => {
-  logger.info(`User Service started on port ${PORT}`);
 
-  // Test santé des connexions après démarrage
-  setTimeout(async () => {
-    try {
-      const health = await healthCheck();
-      logger.info("Database health check", health);
-    } catch (error) {
-      logger.warning("Database health check failed", { error: error.message });
-    }
-  }, 2000);
-});
+// Only start server if not in test mode
+if (process.env.NODE_ENV !== "test") {
+  const server = app.listen(PORT, () => {
+    logger.info(`User Service started on port ${PORT}`);
 
-// Graceful shutdown
-const gracefulShutdown = (signal) => {
-  logger.info(`${signal} received, shutting down gracefully`);
-  server.close(async () => {
-    try {
-      await closeConnections();
-      process.exit(0);
-    } catch (error) {
-      logger.error("Error during shutdown", { error: error.message });
-      process.exit(1);
-    }
+    // Test santé des connexions après démarrage
+    setTimeout(async () => {
+      try {
+        const health = await healthCheck();
+        logger.info("Database health check", health);
+      } catch (error) {
+        logger.warning("Database health check failed", {
+          error: error.message,
+        });
+      }
+    }, 2000);
   });
-};
 
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  // Graceful shutdown
+  const gracefulShutdown = (signal) => {
+    logger.info(`${signal} received, shutting down gracefully`);
+    server.close(async () => {
+      try {
+        await closeConnections();
+        process.exit(0);
+      } catch (error) {
+        logger.error("Error during shutdown", { error: error.message });
+        process.exit(1);
+      }
+    });
+  };
+
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+}
 
 module.exports = app;
